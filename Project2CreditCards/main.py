@@ -47,12 +47,22 @@ if __name__ == '__main__':
     input_data = input_data.drop('CUST_ID', 1)
     input_data = input_data.dropna()
 
+    # normalization
+
+    input_data = (input_data - input_data.mean())/input_data.std()
+
     # determining number of clusters
     # cluster_num = number_of_clusters(data=input_data, plot=True)
-    cluster_num = 8
+    cluster_num = 9
     # do K Means fitting
     km = KMeans(n_clusters=cluster_num, init="k-means++",
                 n_init=10, max_iter=300,
                 tol=1e-04, random_state=0)
     clusters = km.fit_predict(input_data)
-
+    # selects and labels data with cluster information
+    input_data['cluster'] = clusters
+    clustered_data = []
+    for i in range(cluster_num):
+        data = input_data[input_data.cluster == i]
+        clustered_data.append(data)
+    print(clustered_data)
