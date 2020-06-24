@@ -61,11 +61,6 @@ for image in train_set:
     except Exception:
         print('Failed to format: ', image)
 
-print('X train: ', len(x_train))
-print('Y train: ', len(y_train))
-print(x_train)
-print(y_train)
-
 # 7) Read and label each image in the testing set
 for image in test_set:
     try:
@@ -110,6 +105,8 @@ model.add(MaxPooling2D(2, 2))
 model.add(Conv2D(128, kernel_size=3, activation='relu'))
 model.add(MaxPooling2D(2, 2))
 model.add(Conv2D(256, kernel_size=3, activation='relu'))
+model.add(MaxPooling2D(2, 2))
+model.add(Conv2D(512, kernel_size=3, activation='relu'))
 model.add(MaxPooling2D(2, 2))
 model.add(Flatten())
 model.add(Dropout(0.5))
