@@ -22,7 +22,7 @@ def optimal_number_of_clusters(wcss):
     return distances.index(max(distances)) + 2
 
 
-def number_of_clusters(data, plot=False, min_size=2, max_size=20):
+def number_of_clusters(data, plot=False, min_size=2, max_size=10):
     distortions = []
     for i in range(min_size, max_size):
         km = KMeans(
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # input_data = (input_data - input_data.mean())/input_data.std()
 
     # determining number of clusters
-    # cluster_num = number_of_clusters(data=input_data, plot=True)
+    cluster_num = number_of_clusters(data=input_data, plot=True)
     cluster_num = 8
     # do K Means fitting
     km = KMeans(n_clusters=cluster_num, init="k-means++",
