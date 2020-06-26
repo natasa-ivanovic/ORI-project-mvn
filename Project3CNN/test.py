@@ -121,7 +121,7 @@ model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-history = model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=10)
+history = model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=10, shuffle=True)
 
 # 14) Plot accuracy over training period
 plt.plot(history.history['accuracy'])
