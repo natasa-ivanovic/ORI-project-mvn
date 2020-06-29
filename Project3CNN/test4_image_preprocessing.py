@@ -4,11 +4,9 @@ import cv2
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-from keras import backend as K
 from keras.utils import to_categorical
-from keras.models import Sequential, Model
-from keras.layers import Add,  Input, Maximum, Permute,  Reshape, BatchNormalization, Dense,   Dropout, Flatten
-from keras.layers import Cropping1D, Cropping2D, Conv2D, MaxPooling2D
+from keras.models import Sequential, model_from_json
+from keras.layers import Dense, Conv2D, MaxPooling2D, Dropout, Flatten
 
 # Sets for imported data
 normal_set = []
@@ -25,15 +23,14 @@ x_test = []
 y_train = []
 y_test = []
 
-
 # Image pre-processing
-nRows = 150  # width
-nCols = 150  # height
+nRows = 250  # width
+nCols = 250  # height
 channels = 1  # grayscale
 
 
 def import_data():
-    #  Get all images and classify them in lists
+    # Get all images and classify them in lists
     global normal_set
     global bacteria_set
     global virus_set
@@ -65,8 +62,6 @@ def split_data_sets():
     # virus_set - 1407 (703)
     train_set = normal_set[:671] + bacteria_set[:1267] + virus_set[:703]
     test_set = normal_set[671:] + bacteria_set[1267:] + virus_set[703:]
-
-    return train_set, test_set
 
 def label_train_set():
     global train_set
@@ -123,67 +118,7 @@ def nmp_conversion():
     x_train = x_train.reshape([len(train_set),nRows, nCols, 1])
     x_test = x_test.reshape([len(test_set),nRows, nCols, 1])
 
-def conv2d_bn(x, filters, kernel_size, strides=1, padding='same', activation='relu', use_bias=False, name=None):
-  x = Conv2D(filters, kernel_size, strides=strides, padding=padding, use_bias=use_bias, kernel_initializer='he_normal', name=name)(x)
-  if not use_bias:
-    bn_axis = 1 if K.image_data_format() == 'channels_first' else 3
-    bn_name = None if name is None else name + '_bn'
-    x = BatchNormalization(axis=bn_axis, scale=False, name=bn_name)(x)
-  return x
-
-def mfm(x):
-  shape = K.int_shape(x)
-  x = Permute(dims=(3, 2, 1))(x) # swap 1 <-> 3 axis
-  x1 = Cropping2D(cropping=((0, shape[3] // 2), 0))(x)
-  x2 = Cropping2D(cropping=((shape[3] // 2, 0), 0))(x)
-  x = Maximum()([x1, x2])
-  x = Permute(dims=(3, 2, 1))(x) # swap 1 <-> 3 axis
-  x = Reshape([shape[1], shape[2], shape[3] // 2])(x)
-  return x
-
-def common_conv2d(net, filters, filters2, iter=1):
-  res = net
-
-  for v in range(iter):
-    net = conv2d_bn(net, filters=filters, kernel_size=3, strides=1, padding='same')
-    net = mfm(net)
-    net = conv2d_bn(net, filters=filters, kernel_size=3, strides=1, padding='same')
-    net = mfm(net)
-    net = Add()([net, res]) # residual connection
-
-  net = conv2d_bn(net, filters=filters, kernel_size=1, strides=1, padding='same')
-  net = mfm(net)
-  net = conv2d_bn(net, filters=filters2, kernel_size=3, strides=1, padding='same')
-  net = mfm(net)
-
-  return net
-
-def lcnn29(inputs):
-  # Conv1
-  net = conv2d_bn(inputs, filters=96, kernel_size=5, strides=1, padding='same')
-  net = mfm(net)
-  net = MaxPooling2D(pool_size=2, strides=2, padding='same')(net)
-
-  # Block1
-  net = common_conv2d(net,filters=96, filters2=192, iter=1)
-  net = MaxPooling2D(pool_size=2, strides=2, padding='same')(net)
-
-  # Block2
-  net = common_conv2d(net,filters=192, filters2=384, iter=2)
-  net = MaxPooling2D(pool_size=2, strides=2, padding='same')(net)
-
-  # Block3
-  net = common_conv2d(net,filters=384, filters2=256, iter=3)
-
-  # Block4
-  net = common_conv2d(net,filters=256, filters2=256, iter=4)
-  net = MaxPooling2D(pool_size=2, strides=2, padding='same')(net)
-
-  net = Flatten()(net)
-
-  return net
-
-def plot_accuracy():
+def plot_accuracy(history):
     # Plot accuracy over training period
     plt.plot(history.history['accuracy'])
     plt.plot(history.history['val_accuracy'])
@@ -193,7 +128,7 @@ def plot_accuracy():
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
 
-def plot_loss():
+def plot_loss(history):
     # Plot loss over training period
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
@@ -211,7 +146,7 @@ def serialize_model(model, file_name, h5_name):
 
     #serialize weights to HDF5
     model.save_weights(h5_name)
-    print("Model successfully saved to model.json")
+    print("Model successfully saved to model.json!")
 
 def load_model(file_name, h5_name):
     try:
@@ -227,6 +162,7 @@ def load_model(file_name, h5_name):
         print("HUR DUR! File does not exists!")
         return None, False
 
+
 if __name__ == '__main__':
     import_data()
     split_data_sets()
@@ -234,24 +170,26 @@ if __name__ == '__main__':
     label_test_set()
     nmp_conversion()
 
-    file_name = "test3_lightCNN.json"
-    h5_name = "test3_lightCNN_weight.h5"
+    file_name = "test4_image_preprocessing.json"
+    h5_name = "test4_image_preprocessing.h5"
     model, loaded = load_model(file_name, h5_name)
+
     if not model:
         # CNN
-        input_image = Input(shape=(nRows, nCols, channels))
-
-        lcnn_output = lcnn29(inputs=input_image)
-
-        fc1 = Dense(512, activation=None)(lcnn_output)
-        fc1 = Reshape((512, 1))(fc1)
-        fc1_1 = Cropping1D(cropping=(0, 256))(fc1)
-        fc1_2 = Cropping1D(cropping=(256, 0))(fc1)
-        fc1 = Maximum()([fc1_1, fc1_2])
-        fc1 = Flatten()(fc1)
-
-        out = Dense(3, activation='linear')(fc1)
-        model = Model(inputs=[input_image], outputs=out)
+        model = Sequential()
+        model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=(250, 250, 1)))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', padding='same'))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', padding='same'))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', padding='same'))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', padding='same'))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Flatten())
+        model.add(Dropout(0.5))
+        model.add(Dense(3, activation='softmax'))
 
     # Model summary
     print("Model summary")

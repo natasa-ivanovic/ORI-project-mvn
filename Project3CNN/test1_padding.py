@@ -76,11 +76,11 @@ def label_train_set():
             path = 'chest_xray_data_set/' + image
             x_train.append(cv2.resize(cv2.imread(path, cv2.IMREAD_GRAYSCALE), (nRows, nCols), interpolation=cv2.INTER_CUBIC))
             if image in normal_set:
-                y_train.append(1)
+                y_train.append(0)
             elif image in bacteria_set:
-                y_train.append(2)
+                y_train.append(1)
             elif image in virus_set:
-                y_train.append(3)
+                y_train.append(2)
         except Exception:
             print('Failed to format: ', image)
 
@@ -97,11 +97,11 @@ def label_test_set():
             path = 'chest_xray_data_set/' + image
             x_test.append(cv2.resize(cv2.imread(path, cv2.IMREAD_GRAYSCALE), (nRows, nCols), interpolation=cv2.INTER_CUBIC))
             if image in normal_set:
-                y_test.append(1)
+                y_test.append(0)
             elif image in bacteria_set:
-                y_test.append(2)
+                y_test.append(1)
             elif image in virus_set:
-                y_test.append(3)
+                y_test.append(2)
         except Exception:
             print('Failed to format: ', image)
 
@@ -189,7 +189,7 @@ if __name__ == '__main__':
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
         model.add(Flatten())
         model.add(Dropout(0.5))
-        model.add(Dense(4, activation='softmax'))
+        model.add(Dense(3, activation='softmax'))
 
     # Model summary
     print("Model summary")
