@@ -1,0 +1,56 @@
+BROJ KLASTERA: 7
+ATRIBUTI: Balance, Purchases, Credit Limit, Payments, Minimum Payments
+
+klaser0
+	broj ljudi = 1000 (devetina)
+	balance mnogo veci od average (4 puta)
+	purchases prosecno
+	credit limit velik (duplo veci od proseka)
+	uplacivano malo iznad proseka
+	minimum uplacivanje dosta iznad proseka (3x vise)
+klaser1
+	broj ljudi = 5000 (pola)
+	balance dva puta manji od average
+	malo trose (pola manje od average)
+	limit pola ispod (50%)
+	uplacivano ispod pola
+klaser2
+	broj ljudi = 2000 (2/9)
+	malo manji balance od proseka
+	malo vise trose od proseka
+	limit skoro dva puta veci
+	uplate prosecne
+	minimum uplate male
+klaster3
+	73 osobe (malo)
+	balance dva puta veci od proseka
+	purchases oko 200 manji od proseka
+	limit manji od proseka
+	min ogroman??
+klaster4
+	25 osobe malo ali hugeee spenderi
+	balance tri puta veci od proseka
+	purchases 27x veci od proseka :o big spend
+	limit 16 puta veci
+	uplate 15ak puta vece
+	min uplate realtivno male (4x vece od proseka)
+klaster5
+	340
+	dva puta veci od proseka balans
+	5.5x veci purchases, medium spenderi
+	limit dva puta veci od proseka
+	uplate 4x vece od proseka
+	minimum uplate 2x vece
+klaster6
+	7 ljudi-klasterovani zbog velikog min paymentsa
+	balance 4x veci
+	purchases malo veci od proseka (2x)
+	credit limit malo veci od proseka
+	payments malo veci od proseka
+	minimum hugeeeee usporedjenju na prosek? 52k usporedjenju na 844
+
+Zbog nekonzistentnosti minimum paymentsa, sklonicemo tu kolonu za sledeci test.
+Pokusacemo sa ubacivanjem 
+	Purchases Frequency (u cilju da vidimo ko stedi a ko trosi), 
+	Purchases Installments Frequency (koliko se uzima na rate, tipa koji manje trose i imaju manje novca)
+	PRC Full Payment (u cilju da vidimo koliko jos treba da se nadoknadi od para)
