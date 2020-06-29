@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from keras.utils import to_categorical
 from keras.models import Sequential, model_from_json
-from keras.layers import Dense, Conv2D, MaxPooling2D, Dropout, Flatten
+from keras.layers import Dense, Conv2D, MaxPooling2D, Dropout, Flatten, BatchNormalization
 
 # Sets for imported data
 normal_set = []
@@ -178,14 +178,19 @@ if __name__ == '__main__':
         # CNN
         model = Sequential()
         model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=(250, 250, 1)))
+        model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
         model.add(Conv2D(64, kernel_size=3, activation='relu', padding='same'))
+        model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
         model.add(Conv2D(128, kernel_size=3, activation='relu', padding='same'))
+        model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
         model.add(Conv2D(256, kernel_size=3, activation='relu', padding='same'))
+        model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
         model.add(Conv2D(512, kernel_size=3, activation='relu', padding='same'))
+        model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
         model.add(Flatten())
         model.add(Dropout(0.5))

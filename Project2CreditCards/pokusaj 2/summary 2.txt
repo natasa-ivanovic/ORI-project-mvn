@@ -1,0 +1,98 @@
+atributi posmatrani:
+	count: /8950
+	balance: trenutno stanje na racunu
+	purchases: ukupna suma novca potrosena na kupovine
+	purchases_frequency: koliko cesto kupuje (0, 1)
+	purchases_installments_frequency: koliko cesto kupuje na rate (0, 1)
+	credit_limit: maksimalni dozvoljeni limit (minus)
+	payments: ukupna suma novca uplacena na racun
+	prc_full_payment: procenat koji nije otplacen (od purchases)
+
+
+cluster0: Streberi
+	count: 732/8950
+	balance: ~2.5x prosecan
+	purchases: ~3x prosecan
+	purchases_frequency: 0.92, (2x od prosecnog)
+	purchases_installments_frequency: 0.77, (2x od prosecnog)
+	credit_limit: 2x od prosecnog
+	payments: 1.75x od prosecnog
+	prc_full_payment: 7x manje od prosecnog
+
+	Srednji potrosaci, cesto kupuju i cesto uzimaju na rate, ali redovno placaju dugove.
+	Imaju oko 2x veci od prosecnog trenutnog stanja i credit limita, i trose u skladu sa time.
+
+cluster1: Pokrij se koliko imas
+	count: 3712/8950
+	balance: 75% proseka
+	purchases: 20% proseka
+	purchases_frequency: 0.15, 33% proseka, retko
+	purchases_installments_frequency: 0.05, 15% proseka
+	credit_limit: 66% od proseka
+	payments: 50% od proseka
+	prc_full_payment: 20% od proseka
+
+	Ljudi koji ne trose mnogo, imaju dosta nisko stanje i limit, tj. trose koliko imaju i ne ulaze u dugove.
+
+cluster2: Duznici
+	count: 2230/8950
+	balance: 50% proseka
+	purchases: prosek
+	purchases_frequency: 2x od proseka, vrlo cesto (0.87)
+	purchases_installments_frequency: 2x od proseka, vrlo cesto (0.73)
+	credit_limit: ~75% od proseka
+	payments: 60% od proseka
+	prc_full_payment: 50% od proseka, 7%
+
+	Ljudi kojima novac odlazi na otplacivanje dugova (vrlo cesto uzimaju na rate). Imaju velike uplate a mala stanja na racunu, tako da ne kupuju skupe stvari i ne trose vise nego sto imaju.
+
+cluster3: Tuga
+	count: 174/8950
+	balance: 2x vece od proseka
+	purchases: 6x vise od proseka
+	purchases_frequency: 1.5x proseka (0.75)
+	purchases_installments_frequency: 1.5x proseka (0.59)
+	credit_limit: 2x od proseka
+	payments: 8x veci od proseka
+	prc_full_payment: 2x od proseka
+
+	Ljudi koji mnogo trose, mnogo kupuju, cesto uzimaju na rate i imaju veliki credit limit.
+	Mnogo uplacuju i mnogo se zaduzuju. Srednji potrosaci koji su neodgovorniji.
+
+cluster4: Bahati
+	count: 25/8950
+	balance: 3x vece od proseka (najvise do sada)
+	purchases: 27x od proseka! (najvise do sada)
+	purchases_frequency: skoro 2x vise od proseka( 0.89, veoma veoma cesto)
+	purchases_installments_frequency: 2x vise od proseka (0.71, najcesce)
+	credit_limit: 4x vise od proseka (najvise do sada)
+	payments: 25x od proseka (najvise)
+	prc_full_payment: 49% (3x vise od proseka), veoma
+
+	Visoki potrosaci, jako cesto kupuju, najcesce na rate, imaju velik balans i ali ogromno veliku kolicinu potrosenog novca i velik deo novca trebaju da vrate (skoro 50%). Uplacuju isto veoma mnogo novca i imaju ogroman credit limit.
+
+cluster5: Tugice
+	count: 1182/8950
+	balance: 10% od proseka
+	purchases: 1.3x od proseka
+	purchases_frequency: 1.5x proseka (0.77)
+	purchases_installments_frequency: 1.5x proseka (0.59)
+	credit_limit: oko proseka
+	payments: malo ispod proseka
+	prc_full_payment: 81%, 5x vece! od proseka
+
+	Ljudi koji imaju jako malo novca na raspolaganju ali vrlo cesto kupuju, najcesce na rate. Ogroman deo nisu otplatili jos, a uplate su im ispod proseka (previse se zaduzuju).
+
+cluster6: Stedise
+	count: 895/8950
+	balance: 3x vise od proseka
+	purchases: 30% od proseka
+	purchases_frequency: 30% od proseka (0.16)
+	purchases_installments_frequency: ~17% od proseka, jako jako malo (0.05, trecina kupovina)
+	credit_limit: 2x veci od proseka
+	payments: 1.5x veci od proseka
+	prc_full_payment: 1/15 od proseka, jako malo (1.47%)
+
+	Ljudi koji stede, imaju dosta novca na racunu i ne trose mnogo, a i kada trose ne kupuju na rate (vrlo retko) i ne zaduzuju se. 
+	Zbog velikog balansa imaju i velik credit limit (valjda?)
+

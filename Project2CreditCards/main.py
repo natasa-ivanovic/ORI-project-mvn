@@ -47,35 +47,53 @@ def number_of_clusters(data, plot=False, min_size=2, max_size=20):
 def separate_clusters(init_data, cluster_number, plot=False):
     print("Starting separating clusters")
     clustered_data = []
-    tsne = TSNE(n_components=2)
     for i in range(cluster_number):
         data = init_data[init_data['CLUSTER'] == i]
         clustered_data.append(data)
     if plot:
-        print("Plotting PSA")
-        pca = PCA(n_components=2)
-        pca_res = pd.DataFrame(data=pca.fit_transform(init_data), columns=['component 1', 'component 2'])
+        # print("Plotting PSA")
+        # pca = PCA(n_components=2)
+        #
+        # pca_res = pd.DataFrame(data=pca.fit_transform(init_data),
+        #                        columns=['principal component 1', 'principal component 2'])
+        # pca_res = pd.concat([pca_res, init_data[["CLUSTER"]]], axis = 1)
+        # fig = plt.figure(figsize = (8,8))
+        # ax = fig.add_subplot(1,1,1)
+        # ax.set_xlabel('Principal Component 1', fontsize = 15)
+        # ax.set_ylabel('Principal Component 2', fontsize = 15)
+        # ax.set_title('2 component PCA', fontsize = 20)
+        # targets = [0, 1, 2, 3, 4, 5, 6]
+        # colors = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
+        # for target, color in zip(targets,colors):
+        #     values = pca_res['CLUSTER'] == target
+        #     ax.scatter(pca_res.loc[values, 'principal component 1']
+        #                , pca_res.loc[values, 'principal component 2']
+        #                , c = color
+        #                , s = 50)
+        # ax.legend(targets)
+        # ax.grid()
+
+        print("Plotting TSNE graph")
+        tsne = TSNE(n_components=2)
+
+        tsne_res = pd.DataFrame(data=tsne.fit_transform(init_data),
+                               columns=['x axis', 'y axis'])
+        tsne_res = pd.concat([tsne_res, init_data[["CLUSTER"]]], axis = 1)
         fig = plt.figure(figsize = (8,8))
         ax = fig.add_subplot(1,1,1)
-        ax.set_xlabel('Principal Component 1', fontsize = 15)
-        ax.set_ylabel('Principal Component 2', fontsize = 15)
-        ax.set_title('2 component PCA', fontsize = 20)
-        targets = ['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
-        colors = ['r', 'g', 'b']
+        ax.set_xlabel('X axis', fontsize = 15)
+        ax.set_ylabel('Y axis', fontsize = 15)
+        ax.set_title('TSNE reduction', fontsize = 20)
+        targets = [0, 1, 2, 3, 4, 5, 6]
+        colors = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
         for target, color in zip(targets,colors):
-            indicesToKeep = finalDf['target'] == target
-            ax.scatter(finalDf.loc[indicesToKeep, 'principal component 1']
-                       , finalDf.loc[indicesToKeep, 'principal component 2']
+            values = tsne_res['CLUSTER'] == target
+            ax.scatter(tsne_res.loc[values, 'x axis']
+                       , tsne_res.loc[values, 'y axis']
                        , c = color
                        , s = 50)
         ax.legend(targets)
         ax.grid()
-        # print("Plotting TSNE graph")
-        # data_2d = pd.DataFrame(tsne.fit_transform(data))
-        # data_2d['CLUSTER'] = str(i)
-        # data_2d.columns = ['PC1', 'PC2', 'Cluster']
-        # plt.scatter('PC1', 'PC2', data=data_2d)
-        # plt.show()
     return clustered_data
 
 
