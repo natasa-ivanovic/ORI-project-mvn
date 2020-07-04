@@ -1,0 +1,64 @@
+dodata normalizacija i jos regularizacije
+promenjena arhitektura na vise slojeva sa manje filtera
+
+        weight_decay = 1e-4
+        # CNN
+        model = Sequential()
+        model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=(250, 250, 1), kernel_regularizer=l2(weight_decay)))
+        model.add(BatchNormalization())
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(32, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Flatten())
+        model.add(Dense(10, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(3, activation='softmax'))
+
+
+
+ # normalization
+    train_mean = np.mean(x_train)
+    train_std = np.std(x_train)
+
+    test_mean = np.mean(x_test)
+    test_std = np.std(x_test)
+
+    x_train = (x_train-train_mean)/train_std
+    x_test = (x_test-test_mean)/test_std
+
+    # adding variation to training set
+    image_data_gen = ImageDataGenerator(
+        featurewise_center=False,
+        samplewise_center=False,
+        featurewise_std_normalization=False,
+        samplewise_std_normalization=False,
+        zca_whitening=False,
+        rotation_range=15,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        horizontal_flip=True,
+        vertical_flip=False
+        )
+    image_data_gen.fit(x_train)
+
+
+
+    history = model.fit(image_data_gen.flow(x_train, to_categorical(y_train), batch_size=32),
+                        validation_data=(x_test, to_categorical(y_test)), steps_per_epoch=len(x_train) / 32,
+                        epochs=10, shuffle=True)
+
+
+83/82 [==============================] - 526s 6s/step - loss: 0.7706 - accuracy: 0.6312 - val_loss: 0.6913 - val_accuracy: 0.7030
+
+
+Finished evaluation
+Result:  1858 / 2643  correct
+Accuracy:  70.29890276201286 %

@@ -1,0 +1,29 @@
+        # CNN
+        model = Sequential()
+        model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=(250, 250, 1)))
+        model.add(BatchNormalization())
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', padding='same'))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', padding='same'))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(256, kernel_size=3, activation='relu', padding='same'))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Conv2D(512, kernel_size=3, activation='relu', padding='same'))
+        model.add(Dropout(0.5))
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+        model.add(Flatten())
+        model.add(Dropout(0.5))
+        model.add(Dense(3, activation='softmax'))
+
+
+    opt = Adam(learning_rate=0.001)
+
+    epochs=10
+
+    loss: 0.2635 - accuracy: 0.8879 - val_loss: 0.5522 - val_accuracy: 0.7843
+
+    
+Finished evaluation
+Result:  2073 / 2643  correct
+Accuracy:  78.43359818388194 %

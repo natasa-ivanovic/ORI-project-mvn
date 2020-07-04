@@ -7,6 +7,11 @@ import matplotlib.pyplot as plt
 from keras.utils import to_categorical
 from keras.models import Sequential, model_from_json
 from keras.layers import Dense, Conv2D, MaxPooling2D, Dropout, Flatten, BatchNormalization
+from keras.optimizers import Adam, RMSprop
+from keras.preprocessing.image import ImageDataGenerator
+from keras.regularizers import l2
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.models import load_model as load_params
 
 # Sets for imported data
 normal_set = []
@@ -175,42 +180,84 @@ if __name__ == '__main__':
     model, loaded = load_model(file_name, h5_name)
 
     if not model:
+        weight_decay = 1e-4
         # CNN
         model = Sequential()
-        model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=(250, 250, 1)))
+        model.add(Conv2D(32, kernel_size=3, activation='relu', input_shape=(250, 250, 1), kernel_regularizer=l2(weight_decay)))
         model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
-        model.add(Conv2D(64, kernel_size=3, activation='relu', padding='same'))
+        model.add(Conv2D(32, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
         model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
-        model.add(Conv2D(128, kernel_size=3, activation='relu', padding='same'))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
         model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
-        model.add(Conv2D(256, kernel_size=3, activation='relu', padding='same'))
+        model.add(Conv2D(64, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
         model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
-        model.add(Conv2D(512, kernel_size=3, activation='relu', padding='same'))
+        model.add(Conv2D(128, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
         model.add(BatchNormalization())
         model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
-        model.add(Flatten())
+        model.add(Conv2D(128, kernel_size=3, activation='relu', padding='same', kernel_regularizer=l2(weight_decay)))
+        model.add(BatchNormalization())
+        model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
         model.add(Dropout(0.5))
+        model.add(Flatten())
         model.add(Dense(3, activation='softmax'))
 
+    # normalization
+    train_mean = np.mean(x_train)
+    train_std = np.std(x_train)
+
+    test_mean = np.mean(x_test)
+    test_std = np.std(x_test)
+
+    x_train = (x_train-train_mean)/train_std
+    x_test = (x_test-test_mean)/test_std
+
+    # adding variation to training set
+    image_data_gen = ImageDataGenerator(
+        featurewise_center=False,
+        samplewise_center=False,
+        featurewise_std_normalization=False,
+        samplewise_std_normalization=False,
+        zca_whitening=False,
+        rotation_range=15,
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        horizontal_flip=True,
+        vertical_flip=False
+        )
+    image_data_gen.fit(x_train)
     # Model summary
     print("Model summary")
     print(model.summary())
 
+    # adding early stopping
+    es = EarlyStopping(monitor='val_accuracy', mode='max', min_delta=0.01, patience=100, verbose=1, restore_best_weights=True)
+
+    # adding checkpointing (save best iteration)
+
+    checkpoint = ModelCheckpoint('best_model.h5', monitor='val_accuracy', mode='max', save_best_only=True, verbose=1)
+
+    opt = RMSprop(lr=0.0005, decay=1e-6)
+
     # Compile and train the model
-    model.compile(optimizer='adam',
+    model.compile(optimizer=opt,
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
 
     if not loaded:
-        history = model.fit(x_train, to_categorical(y_train), validation_data=(x_test, to_categorical(y_test)), epochs=10, shuffle=True)
+        history = model.fit(image_data_gen.flow(x_train, to_categorical(y_train), batch_size=32),
+                            validation_data=(x_test, to_categorical(y_test)), steps_per_epoch=len(x_train) / 32,
+                            epochs=200, shuffle=True, callbacks=[es, checkpoint])
+
         plot_accuracy(history)
         plot_loss(history)
-        serialize_model(model, file_name, h5_name)
 
+        # model = load_params('best_model.h5')
+
+        serialize_model(model, file_name, h5_name)
     total = y_test.size
     # Predict
     predictions = model.predict(x_test[:total])
@@ -224,6 +271,6 @@ if __name__ == '__main__':
     dict = dict(zip(unique, counts))
     correct = dict[True]
     print(correct)
-    print("Finished evaluation")
+    print("Finished evaluation on best model")
     print("Result: ", correct,"/", total, " correct")
     print("Accuracy: ", correct/total*100, "%")
