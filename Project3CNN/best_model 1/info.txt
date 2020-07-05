@@ -1,0 +1,10 @@
+VALIDATION SET novi-
+
+Test loss: 10.702330589294434
+Test accuracy: 0.7227563858032227
+
+Promenjeno-
+sklonjen image data gen za sada (not sure da li je to bio problem)
+skloljen conv sloj drugi od nazad
+dodata 2 potpuno povezana sloja na kraju sa dropout-om
+izjednacen (manje vise) broj podataka po klasi (sa 2300 na 1200 bakterije)

@@ -116,11 +116,12 @@ def nmp_conversion():
     global nRows, nCols
     # Convert to Numpy Arrays
     x_train = np.array(x_train)
-    x_test = np.array(x_test)
     y_train = np.array(y_train)
+    x_train = x_train.reshape([len(train_set),nRows, nCols, 1])
+
+    x_test = np.array(x_test)
     y_test = np.array(y_test)
 
-    x_train = x_train.reshape([len(train_set),nRows, nCols, 1])
     x_test = x_test.reshape([len(test_set),nRows, nCols, 1])
 
 def plot_accuracy(history):
@@ -204,6 +205,7 @@ if __name__ == '__main__':
         model.add(Dropout(0.5))
         model.add(Flatten())
         model.add(Dense(3, activation='softmax'))
+
 
     # normalization
     train_mean = np.mean(x_train)
