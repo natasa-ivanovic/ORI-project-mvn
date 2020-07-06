@@ -1,0 +1,21 @@
+dodat early stopping (25 epoha sa 0.01 increase u val accuracy)
+dodat checkpointing (best epoha je 80.47% val accuracy)
+
+dodati novi slojevi batch normalization-a nakon svakog conv2d (pre bilo samo nakon prvog)
+
+
+    # adding early stopping
+    es = EarlyStopping(monitor='val_accuracy', mode='max', min_delta=0.01, patience=25, verbose=1, restore_best_weights=True)
+
+    # adding checkpointing (save best iteration)
+
+    checkpoint = ModelCheckpoint('best_model.h5', monitor='val_accuracy', mode='max', save_best_only=True, verbose=1)
+
+
+Finished evaluation on best model
+Result:  2127 / 2643  correct
+Accuracy:  80.47673098751419 %
+Epoch 00057: val_accuracy did not improve from 0.80477
+
+83/82 [==============================] - 445s 5s/step - loss: 0.4641 - accuracy: 0.8232 - val_loss: 0.6122 - val_accuracy: 0.7771
+Epoch 00057: early stopping

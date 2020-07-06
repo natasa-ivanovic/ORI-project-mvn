@@ -1,0 +1,14 @@
+Epoch 00150: val_accuracy did not improve from 0.80893
+
+83/82 [==============================] - 561s 7s/step - loss: 0.2661 - accuracy: 0.9163 - val_loss: 0.8288 - val_accuracy: 0.7813
+Epoch 00150: early stopping
+Started saving model in JSON...
+Model successfully saved to model.json!
+2121
+Finished evaluation on best model
+Result:  2121 / 2643  correct
+Accuracy:  80.24971623155504 %
+
+100 epochs early stopping 
+200 epochs
+made it to 150
