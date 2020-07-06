@@ -71,6 +71,19 @@ class MiniMaxAgent(CaptureAgent):
     on initialization time, please take a look at
     CaptureAgent.registerInitialState in captureAgents.py.
     '''
+
+    self.maxDepth = 2
+    self.hasFoodWeight = gameState.data.layout.height + gameState.data.layout.width
+    self.returnedFoodWeight = self.hasFoodWeight + 1
+    self.opponentLimit = 2
+    aggressive = self.index % 4 == 0
+    if aggressive:
+      self.mustGetOpponent = 100
+      self.bestCarry = 1
+    else:
+      self.mustGetOpponent = 2
+      self.bestCarry = 4
+    self.start = gameState.getAgentPosition(self.index)
     CaptureAgent.registerInitialState(self, gameState)
 
     '''
@@ -80,23 +93,47 @@ class MiniMaxAgent(CaptureAgent):
 
   def chooseAction(self, gameState):
     start = time.time()
-    self.maxDepth = 4
+
+    enemyDistance = [self.getMazeDistance(gameState.getAgentPosition(enemy), gameState.getAgentPosition(self.index)) for enemy in self.getOpponents(gameState)]
+
+    if gameState.getAgentState(self.index).numCarrying < self.bestCarry:
+      self.goPelletWeight = 1
+      self.returnWeight = 0
+    else:
+      self.returnWeight = self.hasFoodWeight + 1
+      self.goPelletWeight = 0
+
+    if min(enemyDistance) < 2 and gameState.getAgentState(self.index).numCarrying != 0:
+      self.returnWeight = self.hasFoodWeight + 1
+      self.goPelletWeight = 0
+    foodLeft = len(self.getFood(gameState).asList())
+
+    if foodLeft <= 2:
+      self.returnWeight = self.hasFoodWeight + 1
+      self.goPelletWeight = 0
     """
     Picks among actions randomly.
     """
     actions = gameState.getLegalActions(self.index)
 
+
     '''
     You should change this in your own agent.
     '''
     successors = [(action, self.getSuccessor(gameState, action)) for action in actions]
-    values = [(action, self.min_function(suc, 0, -99999, 99999)) for action, suc in successors]
+    values = []
+    for action in actions :
+      suc = self.getSuccessor(gameState, action)
+      values.append((action, self.min_function(suc, 0, -99999, 99999, 0)))
+    # print(self.index, "-", gameState.getAgentPosition(self.index),values)
+    # print("______________________________________________________________________________________________________________")
+    #
+    # print("agent 0 position:" + str(gameState.getAgentPosition(0)))
+    # print("agent 1 position:" + str(gameState.getAgentPosition(1)))
+    # print("agent 2 position:" + str(gameState.getAgentPosition(2)))
+    # print("agent 3 position:" + str(gameState.getAgentPosition(3)))
 
-    # max_val = values[0][1]
-    # max_index = 0
-    # for val in values:
-    #   if val[1] > max_val:
-    #     max_index = values.index(val)
+
     print(time.time() - start)
     return max(values, key = lambda value: value[1])[0]
 
@@ -114,82 +151,77 @@ class MiniMaxAgent(CaptureAgent):
 
 
 
-  def min_function(self, gameState, depth, alpha, beta):
+  def min_function(self, gameState, depth, alpha, beta, agentIndex):
     if gameState.isOver():
-      return self.getScore(gameState) - self.distances(gameState, self.index)
-    else:
-      opponenets = self.getOpponents(gameState)
-      allGameStates = []
-      self.foo(opponenets, 0, gameState, allGameStates)
-      # print("Min agent 0 position:" + str(gameState.getAgentPosition(0)))
-      # print("Min agent 1 position:" + str(gameState.getAgentPosition(1)))
-      # print("Min agent 2 position:" + str(gameState.getAgentPosition(2)))
-      # print("Min agent 3 position:" + str(gameState.getAgentPosition(3)))
-      # print()
-      if self.maxDepth // 2 > depth:
-        allGameStates.sort(key=lambda state: self.distances(state, self.index))
-      minEval = 99999
-      for state in allGameStates:
-        eval = self.max_function(state, depth, alpha, beta)
-        minEval = min(minEval, eval)
-        beta = min(beta, eval)
-        if beta <= alpha:
-          break
+      return self.getWeightedEstimates(gameState)
+    opponenets = self.getOpponents(gameState)
+    actions = gameState.getLegalActions(opponenets[agentIndex])
+    minEval = 99999
+    for action in actions:
+      eval = 0
+      succesor = gameState.generateSuccessor(opponenets[agentIndex], action)
+      if len(opponenets) - 1 == agentIndex:
+        eval = self.max_function(succesor, depth, alpha, beta)
+      else:
+        eval = self.min_function(succesor, depth, alpha, beta, agentIndex+1)
+      minEval = min(minEval, eval)
+      beta = min(beta, eval)
+      if beta <= alpha:
+        break
 
-      return minEval
+    return minEval
 
   def max_function(self, gameState, depth, alpha, beta):
+
     depth += 1
     if gameState.isOver() or self.maxDepth == depth:
-      ret = self.getScore(gameState) - self.distances(gameState, self.index)
-      return ret
-    else:
-      actions = gameState.getLegalActions(self.index)
-      # print("Max agent 0 position:" + str(gameState.getAgentPosition(0)))
-      # print("Max agent 1 position:" + str(gameState.getAgentPosition(1)))
-      # print("Max agent 2 position:" + str(gameState.getAgentPosition(2)))
-      # print("Max agent 3 position:" + str(gameState.getAgentPosition(3)))
-      # print()
-      successors = [self.getSuccessor(gameState, action) for action in actions]
-      if self.maxDepth // 2 > depth:
-        successors.sort(key=lambda state: - self.distances(state, self.index))
-      maxEval = -99999
-      for state in successors:
-        eval = self.min_function(state, depth, alpha, beta)
-        maxEval = max(maxEval, eval)
-        alpha = max(alpha, eval)
-        if beta <= alpha:
-          break
-      return maxEval
+      return self.getWeightedEstimates(gameState)
 
+    actions = gameState.getLegalActions(self.index)
 
-  def foo(self, opponents, idx, gameState, allGameStates):
-    allActions = gameState.getLegalActions(opponents[idx])
-    successors = [getFullPowerSuccessor(opponents[idx],gameState, action) for action in allActions]
-    for suc in successors:
-      if idx == len(opponents) - 1:
-        allGameStates.append(suc)
-      else:
-        self.foo(opponents, idx+1, suc, allGameStates)
+    # if self.maxDepth - 1 != depth:
+    #    successors.sort(key=lambda state: - self.distances(state, self.index))
+    maxEval = -99999
+    for action in actions:
+
+      state = self.getSuccessor(gameState, action)
+      eval = self.min_function(state, depth, alpha, beta, 0)
+      maxEval = max(maxEval, eval)
+      alpha = max(alpha, eval)
+      if beta <= alpha:
+        break
+    return maxEval
 
   def distances(self, gameState, idx):
-    # myPos = gameState.getAgentState(self.index).getPosition()
-    foodList = []
-    if idx % 2 == 0:
-      foodList = gameState.getBlueFood().asList()
-    else:
-      foodList = gameState.getRedFood().asList()
-    ret = sum([self.getMazeDistance(gameState.getAgentPosition(idx), food) for food in foodList])
-    return ret
+    myPos = gameState.getAgentState(self.index).getPosition()
+    foodList = self.getFood(gameState).asList()
+    minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
+    return minDistance
 
-def getFullPowerSuccessor(index, gameState, action):
-    """
-    Finds the next successor which is a grid position (location tuple).
-    """
-    successor = gameState.generateSuccessor(index, action)
-    pos = successor.getAgentState(index).getPosition()
-    if pos != util.nearestPoint(pos):
-      # Only half a grid position was covered
-      return successor.generateSuccessor(index, action)
-    else:
-      return successor
+  def getWeightedEstimates(self, gameState):
+    val1 = -self.goPelletWeight * self.distances(gameState, self.index)
+    val2=      -self.returnWeight * self.getMazeDistance(gameState.getAgentPosition(self.index), (1,gameState.getAgentPosition(self.index)[1]))
+    val3=      +self.pelletScore(gameState)
+    val4=      -self.enemyAteMe(gameState)
+    val5=      -self.eatEnemy(gameState)
+    # print(val1, val2, val3, val4, val5)
+    # print(val1 + val2 + val3 + val4 + val5)
+    return val1 + val2 + val3 + val4 + val5
+
+  def pelletScore(self, gameState):
+    return self.getScore(gameState) * self.returnedFoodWeight \
+           +gameState.getAgentState(self.index).numCarrying * self.hasFoodWeight
+
+  def eatEnemy(self, gameState):
+    sum = 0
+    opponents = gameState.getBlueTeamIndices()
+    me = gameState.getAgentPosition(self.index)
+    for opponent in opponents:
+      them = gameState.getAgentPosition(opponent)
+      sum += gameState.getAgentState(opponent).numCarrying * self.mustGetOpponent * self.getMazeDistance(me, them)
+    return sum
+
+  def enemyAteMe(self, gameState):
+    if self.start == gameState.getAgentPosition(self.index):
+      return 1000
+    return 0
