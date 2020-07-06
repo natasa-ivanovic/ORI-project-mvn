@@ -33,7 +33,6 @@ def number_of_clusters(data, plot=False, min_size=2, max_size=20):
         )
         km.fit(data)
         distortions.append(km.inertia_)
-        # print(str(i) + ". iteration change compared to previous: " + str(distortions[i-3] - km.inertia_))
     num_clusters = optimal_number_of_clusters(distortions)
     print("Optimal cluster number is: " + str(num_clusters))
     if plot:
@@ -44,58 +43,59 @@ def number_of_clusters(data, plot=False, min_size=2, max_size=20):
     return num_clusters
 
 
-def separate_clusters(init_data, cluster_number, plot=False):
+def separate_clusters(init_data, cluster_number, plot=False, pca=True):
     print("Starting separating clusters")
     clustered_data = []
     for i in range(cluster_number):
         data = init_data[init_data['CLUSTER'] == i]
         clustered_data.append(data)
     if plot:
-        print("Plotting PSA")
-        pca = PCA(n_components=2)
+        if pca:
+            print("Plotting PSA")
+            pca = PCA(n_components=2)
 
-        pca_res = pd.DataFrame(data=pca.fit_transform(init_data),
-                               columns=['principal component 1', 'principal component 2'])
-        print(pca.explained_variance_)
-        print(pca.explained_variance_ratio_)
-        pca_res = pd.concat([pca_res, init_data[["CLUSTER"]]], axis = 1)
-        fig = plt.figure(figsize = (8,8))
-        ax = fig.add_subplot(1,1,1)
-        ax.set_xlabel('Principal Component 1', fontsize = 15)
-        ax.set_ylabel('Principal Component 2', fontsize = 15)
-        ax.set_title('2 component PCA', fontsize = 20)
-        targets = [0, 1, 2, 3, 4, 5, 6]
-        colors = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
-        for target, color in zip(targets,colors):
-            values = pca_res['CLUSTER'] == target
-            ax.scatter(pca_res.loc[values, 'principal component 1']
-                       , pca_res.loc[values, 'principal component 2']
-                       , c = color
-                       , s = 50)
-        ax.legend(targets)
-        ax.grid()
+            pca_res = pd.DataFrame(data=pca.fit_transform(init_data),
+                                   columns=['principal component 1', 'principal component 2'])
+            print(pca.explained_variance_)
+            print(pca.explained_variance_ratio_)
+            pca_res = pd.concat([pca_res, init_data[["CLUSTER"]]], axis = 1)
+            fig = plt.figure(figsize = (8,8))
+            ax = fig.add_subplot(1,1,1)
+            ax.set_xlabel('Principal Component 1', fontsize = 15)
+            ax.set_ylabel('Principal Component 2', fontsize = 15)
+            ax.set_title('2 component PCA', fontsize = 20)
+            targets = [0, 1, 2, 3, 4, 5, 6]
+            colors = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
+            for target, color in zip(targets,colors):
+                values = pca_res['CLUSTER'] == target
+                ax.scatter(pca_res.loc[values, 'principal component 1']
+                           , pca_res.loc[values, 'principal component 2']
+                           , c = color
+                           , s = 50)
+            ax.legend(targets)
+            ax.grid()
+        else:
+            print("Plotting TSNE graph")
+            tsne = TSNE(n_components=2)
 
-        # print("Plotting TSNE graph")
-        # tsne = TSNE(n_components=2)
-        #
-        # tsne_res = pd.DataFrame(data=tsne.fit_transform(init_data),
-        #                        columns=['x axis', 'y axis'])
-        # tsne_res = pd.concat([tsne_res, init_data[["CLUSTER"]]], axis = 1)
-        # fig = plt.figure(figsize = (8,8))
-        # ax = fig.add_subplot(1,1,1)
-        # ax.set_xlabel('X axis', fontsize = 15)
-        # ax.set_ylabel('Y axis', fontsize = 15)
-        # ax.set_title('TSNE reduction', fontsize = 20)
-        # targets = [0, 1, 2, 3, 4, 5, 6]
-        # colors = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
-        # for target, color in zip(targets,colors):
-        #     values = tsne_res['CLUSTER'] == target
-        #     ax.scatter(tsne_res.loc[values, 'x axis']
-        #                , tsne_res.loc[values, 'y axis']
-        #                , c = color
-        #                , s = 50)
-        # ax.legend(targets)
-        # ax.grid()
+            tsne_res = pd.DataFrame(data=tsne.fit_transform(init_data),
+                                   columns=['x axis', 'y axis'])
+            tsne_res = pd.concat([tsne_res, init_data[["CLUSTER"]]], axis = 1)
+            fig = plt.figure(figsize = (8,8))
+            ax = fig.add_subplot(1,1,1)
+            ax.set_xlabel('X axis', fontsize = 15)
+            ax.set_ylabel('Y axis', fontsize = 15)
+            ax.set_title('TSNE reduction', fontsize = 20)
+            targets = [0, 1, 2, 3, 4, 5, 6]
+            colors = ['r', 'g', 'b', 'c', 'y', 'm', 'k']
+            for target, color in zip(targets,colors):
+                values = tsne_res['CLUSTER'] == target
+                ax.scatter(tsne_res.loc[values, 'x axis']
+                           , tsne_res.loc[values, 'y axis']
+                           , c = color
+                           , s = 50)
+            ax.legend(targets)
+            ax.grid()
     return clustered_data
 
 
@@ -137,9 +137,9 @@ def cluster_data(columns):
     # pre-processing
     input_data, original_data = preprocess(input_data, columns, all_cols)
     # determining number of clusters
-    cluster_num = number_of_clusters(data=input_data, plot=True)
+    # cluster_num = number_of_clusters(data=input_data, plot=True)
     # number we got
-    # cluster_num = 7
+    cluster_num = 7
     # do K Means fitting
     km = KMeans(n_clusters=cluster_num, init="k-means++",
                 n_init=10, max_iter=300,
@@ -148,7 +148,8 @@ def cluster_data(columns):
     # selects and labels data with cluster information
     original_data['CLUSTER'] = clusters
     # separates clusters into a list of dataframes
-    clustered_data = separate_clusters(original_data, cluster_num, plot=True)
+    # forward pca=True for pca and pca=False for TSNE (along with plot=True)
+    clustered_data = separate_clusters(original_data, cluster_num, plot=False)
     columns.append("CLUSTER")
     sns.pairplot(original_data, hue="CLUSTER")
     plt.show()
