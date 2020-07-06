@@ -195,7 +195,7 @@ class MiniMaxAgent(CaptureAgent):
   def distances(self, gameState, idx):
     myPos = gameState.getAgentState(self.index).getPosition()
     foodList = self.getFood(gameState).asList()
-    if(len(foodList) != 0)
+    if(len(foodList) != 0):
       minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
       return minDistance
     else:
