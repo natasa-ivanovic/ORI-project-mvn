@@ -195,8 +195,11 @@ class MiniMaxAgent(CaptureAgent):
   def distances(self, gameState, idx):
     myPos = gameState.getAgentState(self.index).getPosition()
     foodList = self.getFood(gameState).asList()
-    minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
-    return minDistance
+    if(len(foodList) != 0)
+      minDistance = min([self.getMazeDistance(myPos, food) for food in foodList])
+      return minDistance
+    else:
+      return 0
 
   def getWeightedEstimates(self, gameState):
     val1 = -self.goPelletWeight * self.distances(gameState, self.index)
