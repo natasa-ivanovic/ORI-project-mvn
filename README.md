@@ -9,5 +9,5 @@ Project 1 - Pacman Capture The Flag<br>
 Project 2 - Clustering credit card data<br>
 Project 3 - Classifying lung scans with CNN<br>
 
-Results and discussion are <a href="https://github.com/natasa-ivanovic/ORI-project-mvn/tree/master/Reports">here.</a>  
-Inside of the folders for the projects you can find instructions of how to start the projects.
+Results and discussion are <a href="https://github.com/natasa-ivanovic/ORI-project-mvn/tree/master/Results">here.</a>  
+Inside of the folders for the projects you can find instructions on how to start the projects.
